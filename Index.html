@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Festival Calendar 2026 - A Living Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Style.css">
+</head>
+<body class="light-mode">
+
+    <div class="sub-info" id="year-label">INDIAN HERITAGE • 2026</div>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="main-wrapper" id="main-wrapper">
+        <!-- Festival Display Layer -->
+        <div class="festival-overlay" id="festival-overlay">
+            <h2 class="fest-name" id="fest-name-display">Diwali</h2>
+            <p class="fest-sub" id="fest-sub-display">The Festival of Lights</p>
+        </div>
+
+        <!-- Calendar Layer -->
+        <div class="calendar-section" id="calendar-section">
+            <h1 class="text-4xl font-extralight tracking-tight mb-2" id="month-name">January</h1>
+            <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+
+        <!-- Shared Controls -->
+        <div class="controls">
+            <div id="nav-group" class="flex gap-10">
+                <button class="btn-ui" onclick="changeMonth(-1)">Previous</button>
+                <button class="btn-ui" onclick="changeMonth(1)">Next</button>
+            </div>
+
+            <div id="settings-group" class="flex gap-6 opacity-60 hover:opacity-100 transition-opacity">
+                <button class="btn-ui" id="theme-toggle" onclick="toggleDarkMode()">Light/Dark</button>
+                <button class="btn-ui" id="motion-toggle" onclick="toggleMotion()">Motion: On</button>
+                <button class="btn-ui" id="fest-mode-toggle" onclick="toggleFestModeGlobal()">Fest Mode: On</button>
+            </div>
+
+            <button class="btn-ui" id="reset-btn" onclick="exitFestivalMode()">Return to Calendar</button>
+        </div>
+    </div>
+
+    <script src="Script.js"></script>
+</body>
+</html>
