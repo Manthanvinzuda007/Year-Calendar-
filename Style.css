@@ -1,14 +1,8 @@
- :root {
-            --bg-base: #fdfcf8; /* Ivory */
+:root {
+            --bg-base: #fdfcf8;
             --text-main: #333333;
-            --accent-fest: #e07a5f;
-            --transition-main: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        body.dark-mode {
-            --bg-base: #121212;
-            --text-main: #e0e0e0;
-            --accent-fest: #ffd700;
+            --accent-ui: #e07a5f;
+            --page-transition: 1s cubic-bezier(0.645, 0.045, 0.355, 1);
         }
 
         body {
@@ -18,7 +12,7 @@
             overflow: hidden;
             margin: 0;
             user-select: none;
-            transition: background-color var(--transition-main), color var(--transition-main);
+            transition: background-color 1.5s ease;
         }
 
         #bg-canvas {
@@ -31,70 +25,51 @@
             pointer-events: none;
         }
 
-        .main-wrapper {
-            position: relative;
-            z-index: 10;
-            height: 100vh;
+        .perspective-container {
+            perspective: 2000px;
             width: 100vw;
+            height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            z-index: 10;
+            position: relative;
         }
 
-        .calendar-section {
-            transition: var(--transition-main);
+        .calendar-page {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+            background: transparent;
+            transform-style: preserve-3d;
+            transition: transform var(--page-transition), opacity var(--page-transition), filter 0.8s ease;
             text-align: center;
         }
 
-        .festival-overlay {
+        .page-flip-exit { transform: rotateY(-110deg) translateX(-110%) scale(0.8); opacity: 0; }
+        .page-flip-enter { transform: rotateY(30deg) translateX(60%) scale(0.9); opacity: 0; }
+
+        .fest-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -60%);
+            transform: translate(-50%, -55%);
             text-align: center;
             pointer-events: none;
             opacity: 0;
-            transition: var(--transition-main);
+            transition: 1.2s ease-out;
             width: 100%;
+            z-index: 5;
         }
 
-        .festival-overlay.active {
-            opacity: 1;
-            transform: translate(-50%, -50%);
-        }
-
-        .fest-name {
-            font-size: clamp(2.5rem, 8vw, 6rem);
-            font-weight: 200;
-            letter-spacing: -0.02em;
-            line-height: 1.1;
-        }
-
-        .fest-sub {
-            font-size: 0.9rem;
-            letter-spacing: 0.4em;
-            text-transform: uppercase;
-            margin-top: 1.5rem;
-            opacity: 0.7;
-        }
+        .fest-overlay.active { opacity: 1; transform: translate(-50%, -50%); }
 
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 0.25rem;
-            width: 90vw;
-            max-width: 440px;
+            gap: 0.4rem;
             margin-top: 2rem;
-        }
-
-        .day-label {
-            text-align: center;
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: #888;
-            padding-bottom: 0.75rem;
         }
 
         .date-cell {
@@ -106,85 +81,40 @@
             font-weight: 300;
             border-radius: 50%;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: 0.3s;
             position: relative;
         }
-
-        .date-cell:hover {
-            background: rgba(128, 128, 128, 0.08);
-            transform: scale(1.1);
-        }
-
-        .date-cell.is-festival {
-            color: var(--accent-fest);
-            font-weight: 500;
-        }
-
-        .date-cell.is-festival::after {
-            content: '';
-            position: absolute;
-            bottom: 6px;
-            width: 4px;
-            height: 4px;
-            background: var(--accent-fest);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-fest);
-        }
-
-        /* Festival Mode States */
-        .festival-mode .calendar-section {
-            opacity: 0;
-            filter: blur(10px);
-            transform: scale(0.9);
-            pointer-events: none;
+        .date-cell:hover { background: rgba(0,0,0,0.05); transform: scale(1.1); }
+        .date-cell.is-special { color: var(--accent-ui); font-weight: 600; }
+        .date-cell.is-special::after {
+            content: ''; position: absolute; bottom: 5px; width: 4px; height: 4px;
+            background: var(--accent-ui); border-radius: 50%; box-shadow: 0 0 10px var(--accent-ui);
         }
 
         .controls {
             position: absolute;
-            bottom: 2rem;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1.2rem;
             z-index: 100;
-            width: 100%;
         }
 
         .btn-ui {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #999;
-            font-size: 0.7rem;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            transition: color 0.3s, transform 0.2s;
+            background: none; border: none; cursor: pointer; color: #888;
+            font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+            transition: 0.3s;
         }
+        .btn-ui:hover { color: var(--text-main); }
 
-        .btn-ui:hover {
-            color: var(--text-main);
-            transform: translateY(-1px);
-        }
-
-        .active-ui {
-            color: var(--text-main) !important;
-            border-bottom: 1px solid currentColor;
-        }
-
-        #reset-btn {
-            display: none;
-            font-weight: 500;
-            color: var(--text-main);
-        }
-
-        .festival-mode #reset-btn { display: block; }
-        .festival-mode #nav-group, .festival-mode #settings-group { display: none; }
-
-        .sub-info {
-            position: absolute;
-            top: 2rem;
-            left: 2rem;
-            font-size: 0.65rem;
-            letter-spacing: 0.2em;
-            color: #aaa;
+        .preview-active .calendar-page { opacity: 0.05; filter: blur(15px); pointer-events: none; }
+        
+        .realtime-badge {
+            position: fixed; top: 2rem; right: 2rem;
+            font-size: 0.6rem; letter-spacing: 0.2em;
+            color: #aaa; background: rgba(0,0,0,0.03);
+            padding: 0.5rem 1rem; border-radius: 20px;
         }
