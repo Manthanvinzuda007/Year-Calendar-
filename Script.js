@@ -14,6 +14,7 @@
         let particles = [];
         let animationFrame;
         let activeTheme = 'winter';
+        let globalTime = 0;
 
         const specialDays = {
             "0-1": { name: "New Year", sub: "Fresh Beginnings • 2026", color: "#fdfcf8", accent: "#ffb300", anim: "newyear" },
@@ -65,6 +66,7 @@
                 this.vy = (Math.random() - 0.5) * 0.4;
                 this.opacity = Math.random() * 0.4;
                 this.color = getComputedStyle(document.documentElement).getPropertyValue('--accent-ui').trim();
+                this.angle = Math.random() * Math.PI * 2;
 
                 if (type === 'newyear' || type === 'kids') {
                     this.color = `hsl(${Math.random() * 360}, 60%, 60%)`;
@@ -74,30 +76,34 @@
                     this.vx = 0.5;
                     this.color = '#78909c';
                 } else if (type === 'lohri') {
-                    this.vy = -1 - Math.random() * 2;
+                    this.vy = -1.5 - Math.random() * 3;
+                    this.vx = (Math.random() - 0.5) * 1;
                     this.color = '#ff7043';
-                    this.x = canvas.width / 2 + (Math.random() - 0.5) * 100;
+                    this.x = canvas.width / 2 + (Math.random() - 0.5) * 150;
                     this.y = canvas.height;
                 } else if (type === 'kites') {
-                    this.size = 15;
-                    this.vx = -1.5 - Math.random();
-                    this.x = canvas.width + 50;
+                    this.size = 18;
+                    this.vx = -1.8 - Math.random();
+                    this.vy = Math.sin(Math.random() * 10) * 0.5;
+                    this.x = canvas.width + 100;
                     this.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
-                } else if (type === 'diwali' || type === 'martyr') {
-                    this.size = 10;
+                } else if (type === 'diwali' || type === 'martyr' || type === 'petals') {
+                    this.size = type === 'petals' ? 6 : 10;
                     this.opacity = 0.8;
-                    this.vy = -0.3;
-                    this.color = type === 'diwali' ? '#ffd700' : '#ffffff';
+                    this.vy = type === 'petals' ? 1.2 : -0.4;
+                    this.vx = Math.sin(this.angle) * 0.5;
+                    this.color = type === 'diwali' ? '#ffd700' : (type === 'petals' ? '#fff176' : '#ffffff');
                 } else if (type === 'holi') {
-                    this.size = 50 + Math.random() * 50;
-                    this.opacity = 0.05;
-                    this.color = `hsl(${Math.random() * 360}, 50%, 70%)`;
+                    this.size = 60 + Math.random() * 60;
+                    this.opacity = 0.04;
+                    this.color = `hsl(${Math.random() * 360}, 60%, 75%)`;
                 }
             }
 
             update() {
                 if (!isMotionOn) return;
                 this.x += this.vx; this.y += this.vy;
+                if (this.type === 'petals') this.angle += 0.02;
                 if (this.y > canvas.height + 100) this.y = -100;
                 if (this.y < -100) this.y = canvas.height + 100;
                 if (this.x > canvas.width + 100) this.x = -100;
@@ -110,12 +116,16 @@
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
                 if (this.type === 'kites') {
-                    ctx.translate(this.x, this.y); ctx.rotate(Math.PI/4);
+                    ctx.translate(this.x, this.y); ctx.rotate(Math.PI/4 + Math.sin(globalTime/20)*0.1);
                     ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.5; ctx.strokeRect(-this.size/2, -this.size/2, this.size, this.size);
                 } else if (this.type === 'diwali' || this.type === 'martyr') {
-                    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 15);
+                    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 18);
                     g.addColorStop(0, this.color); g.addColorStop(1, 'transparent');
-                    ctx.fillStyle = g; ctx.arc(this.x, this.y, 15, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = g; ctx.arc(this.x, this.y, 18, 0, Math.PI*2); ctx.fill();
+                } else if (this.type === 'petals') {
+                    ctx.translate(this.x, this.y); ctx.rotate(this.angle);
+                    ctx.ellipse(0, 0, this.size, this.size/2, 0, 0, Math.PI*2); ctx.fill();
                 } else {
                     ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
                 }
@@ -125,36 +135,71 @@
 
         function drawSilhouettes(type) {
             ctx.save();
-            ctx.globalAlpha = 0.04;
             const w = canvas.width; const h = canvas.height;
+            const pulse = Math.sin(globalTime / 30) * 0.01;
+            ctx.globalAlpha = 0.04 + pulse;
+
             if (type === 'republic' || type === 'independence') {
                 ctx.fillStyle = '#a52a2a';
                 ctx.beginPath(); ctx.moveTo(w*0.3, h); ctx.lineTo(w*0.3, h*0.6);
                 ctx.lineTo(w*0.35, h*0.55); ctx.lineTo(w*0.65, h*0.55);
                 ctx.lineTo(w*0.7, h*0.6); ctx.lineTo(w*0.7, h); ctx.fill();
+                
+                // Animated Ashoka Chakra
+                ctx.globalAlpha = 0.1;
+                ctx.strokeStyle = '#000080'; ctx.lineWidth = 1;
+                ctx.translate(w/2, h*0.75); ctx.rotate(globalTime / 100);
+                ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI*2); ctx.stroke();
+                for(let i=0; i<24; i++) { ctx.rotate(Math.PI/12); ctx.moveTo(0,0); ctx.lineTo(20,0); ctx.stroke(); }
             } else if (type === 'ganesha') {
                 ctx.fillStyle = '#e64a19';
-                ctx.beginPath(); ctx.arc(w/2, h*0.6, 60, 0, Math.PI*2); ctx.fill();
-                ctx.fillRect(w/2-20, h*0.6, 40, 80);
+                ctx.beginPath(); ctx.arc(w/2, h*0.6 + Math.sin(globalTime/40)*5, 65, 0, Math.PI*2); ctx.fill();
+                ctx.fillRect(w/2-25, h*0.6, 50, 90);
             } else if (type === 'ram') {
-                ctx.strokeStyle = '#fb8c00'; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.arc(w/2, h/2, 150, Math.PI*0.8, Math.PI*1.2); ctx.stroke();
+                ctx.strokeStyle = '#fb8c00'; ctx.lineWidth = 3;
+                const glow = Math.abs(Math.sin(globalTime/20)) * 10;
+                ctx.shadowBlur = glow; ctx.shadowColor = '#fb8c00';
+                ctx.beginPath(); ctx.arc(w/2, h/2, 160, Math.PI*0.8, Math.PI*1.2); ctx.stroke();
+                // Arrow
+                ctx.beginPath(); ctx.moveTo(w/2 - 160, h/2); ctx.lineTo(w/2 - 20, h/2); ctx.stroke();
             } else if (type === 'gandhi') {
-                ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.arc(w/2, h*0.6, 50, 0, Math.PI*2); ctx.stroke();
-            } else if (type === 'chhath') {
-                ctx.fillStyle = '#ff6f00'; ctx.beginPath(); ctx.arc(w/2, h*0.7, 80, Math.PI, 0); ctx.fill();
+                ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5;
+                // Charkha Frame
+                ctx.strokeRect(w/2 - 100, h*0.7, 200, 5);
+                // Rotating Wheel
+                ctx.translate(w/2 + 60, h*0.65); ctx.rotate(globalTime / 60);
+                ctx.beginPath(); ctx.arc(0, 0, 40, 0, Math.PI*2); ctx.stroke();
+                for(let i=0; i<8; i++) { ctx.rotate(Math.PI/4); ctx.moveTo(0,0); ctx.lineTo(40,0); ctx.stroke(); }
+            } else if (type === 'chhath' || type === 'growth') {
+                const sunY = h*0.7 + Math.sin(globalTime/50)*10;
+                const grad = ctx.createRadialGradient(w/2, sunY, 0, w/2, sunY, 120);
+                grad.addColorStop(0, 'rgba(255, 111, 0, 0.2)'); grad.addColorStop(1, 'transparent');
+                ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(w/2, sunY, 120, 0, Math.PI*2); ctx.fill();
             }
             ctx.restore();
         }
 
         function createParticles(theme) {
             particles = []; activeTheme = theme;
-            const count = (theme === 'holi' || theme === 'winter') ? 30 : 80;
+            const count = (theme === 'holi' || theme === 'winter') ? 40 : 100;
             for(let i=0; i<count; i++) particles.push(new Particle(theme));
         }
 
         function animate() {
+            globalTime++;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Summer Heat Shimmer Effect
+            if (activeTheme === 'summer' && isMotionOn) {
+                ctx.save();
+                ctx.globalAlpha = 0.05;
+                for(let i=0; i<5; i++) {
+                    ctx.fillStyle = `rgba(255, 235, 59, ${0.1 * Math.sin(globalTime/20 + i)})`;
+                    ctx.fillRect(0, canvas.height * (0.2 * i) + Math.sin(globalTime/10)*20, canvas.width, 40);
+                }
+                ctx.restore();
+            }
+
             if (activeTheme !== 'winter' && activeTheme !== 'summer') drawSilhouettes(activeTheme);
             particles.forEach(p => { p.update(); p.draw(); });
             animationFrame = requestAnimationFrame(animate);
