@@ -1,270 +1,279 @@
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        const page = document.getElementById('calendar-page');
-        const overlay = document.getElementById('fest-overlay');
-        const grid = document.getElementById('calendar-grid');
-        const monthTitle = document.getElementById('month-display');
-        const clockEl = document.getElementById('realtime-clock');
-
-        let currentMonth = 0;
-        let currentYear = 2026;
-        let isSeasonalOn = true;
-        let isMotionOn = true;
-        let isPreviewMode = false;
-        let particles = [];
-        let animationFrame;
-        let activeTheme = 'winter';
-        let globalTime = 0;
-
-        const specialDays = {
-            "0-1": { name: "New Year", sub: "Fresh Beginnings • 2026", color: "#fdfcf8", accent: "#ffb300", anim: "newyear" },
-            "0-13": { name: "Lohri", sub: "Harvest Warmth • Rising Embers", color: "#fff3e0", accent: "#ff5722", anim: "lohri" },
-            "0-14": { name: "Uttarayan", sub: "Makar Sankranti • Sky of Kites", color: "#e3f2fd", accent: "#03a9f4", anim: "kites" },
-            "0-23": { name: "Basant Panchami", sub: "Saraswati Puja • Yellow Bloom", color: "#fffde7", accent: "#fbc02d", anim: "petals" },
-            "0-26": { name: "Republic Day", sub: "Red Fort • Constitution Pride", color: "#fdfcf8", accent: "#ff9933", anim: "republic" },
-            "1-15": { name: "Mahashivratri", sub: "Midnight Devotion • Lord Shiva", color: "#1a1a2e", accent: "#9c27b0", anim: "shiva", dark: true },
-            "2-3": { name: "Holika Dahan", sub: "Victory of Good • Fire Sparks", color: "#fff3e0", accent: "#ff7043", anim: "lohri" },
-            "2-4": { name: "Holi", sub: "Festival of Colors", color: "#fff5f8", accent: "#e91e63", anim: "holi" },
-            "2-19": { name: "Ugadi", sub: "Gudi Padwa • New Growth", color: "#f1f8e9", accent: "#43a047", anim: "growth" },
-            "2-23": { name: "Shaheed Diwas", sub: "Respect • Courage • Sacrifice", color: "#121212", accent: "#757575", anim: "martyr", dark: true },
-            "2-26": { name: "Ram Navami", sub: "Dharma • Lord Ram Aura", color: "#fff8e1", accent: "#fb8c00", anim: "ram" },
-            "3-14": { name: "Ambedkar Jayanti", sub: "Equality • Constitution", color: "#f0f4ff", accent: "#000080", anim: "ambedkar" },
-            "3-14-B": { name: "Baisakhi", sub: "Golden Harvest Joy", color: "#fffde7", accent: "#fbc02d", anim: "harvest" },
-            "3-19": { name: "Akshaya Tritiya", sub: "Golden Prosperity", color: "#fdfcf8", accent: "#ffd700", anim: "newyear" },
-            "6-16": { name: "Rath Yatra", sub: "Chariot of Devotion", color: "#fff3e0", accent: "#e65100", anim: "rath" },
-            "6-29": { name: "Guru Purnima", sub: "Wisdom • Moonlight Guidance", color: "#f5f5f5", accent: "#607d8b", anim: "guru" },
-            "7-15": { name: "Independence", sub: "Freedom • 15 August", color: "#fdfcf8", accent: "#138808", anim: "independence" },
-            "7-17": { name: "Nag Panchami", sub: "Sacred Nature • Belief", color: "#f1f8e9", accent: "#2e7d32", anim: "growth" },
-            "7-26": { name: "Onam", sub: "Pookalam • Boat Rhythm", color: "#f1f8e9", accent: "#2e7d32", anim: "onam" },
-            "7-28": { name: "Raksha Bandhan", sub: "Emotional Bond • Rakhi", color: "#fff9f0", accent: "#ff6d00", anim: "rakhi" },
-            "8-4": { name: "Janmashtami", sub: "Midnight Blue • Lord Krishna", color: "#0d47a1", accent: "#ffd600", anim: "shiva", dark: true },
-            "8-14": { name: "Ganesh Chaturthi", sub: "Lord Ganesha • Festive Glow", color: "#fff3e0", accent: "#e64a19", anim: "ganesha" },
-            "9-2": { name: "Gandhi Jayanti", sub: "Peace • Charkha Spirit", color: "#fdfcf8", accent: "#757575", anim: "gandhi" },
-            "9-20": { name: "Dussehra", sub: "Victory of Good", color: "#fff3e0", accent: "#f4511e", anim: "ram" },
-            "9-29": { name: "Karva Chauth", sub: "Moonlight Faith & Love", color: "#1a1a1a", accent: "#f06292", anim: "guru", dark: true },
-            "10-8": { name: "Diwali", sub: "The Festival of Lights", color: "#1a1a1a", accent: "#ffd700", anim: "diwali", dark: true },
-            "10-14": { name: "Children's Day", sub: "Innocence • Clean Joy", color: "#fdfcf8", accent: "#03a9f4", anim: "kids" },
-            "10-15": { name: "Chhath Puja", sub: "Spiritual Calm • Sun Worship", color: "#fff8e1", accent: "#ff6f00", anim: "chhath" },
-            "11-25": { name: "Christmas", sub: "Warm Joy • Winter Glow", color: "#fdfcf8", accent: "#c62828", anim: "snow" }
+// --- DATA CONFIGURATION ---
+        const festivals = {
+            "1-1": { name: "Happy New Year 2026", theme: "newyear", desc: "Nava varsh ni shubhkaamnao! Fireworks ane khushiyo no aagman." },
+            "1-14": { name: "Uttarayan / Sankranti", theme: "uttarayan", desc: "Kai Po Che! Aakash ma rang-berangi patango no utsav." },
+            "1-26": { name: "Republic Day", theme: "republic", desc: "Bharatiya sanvidhan no divas. Lal Qila par tirango ane desh-bhakti no maahol." },
+            "2-15": { name: "Mahashivratri", theme: "shivratri", desc: "Om Namah Shivay. Adhyatmik shanti, Ardh-Chandra ane bhagwan shiv ni bhakti." },
+            "3-3": { name: "Holika Dahan", theme: "holika", desc: "Asatya par satya no vijay. Agni ni pavitrata ane burai no naash." },
+            "3-4": { name: "Holi", theme: "holi", desc: "Rango no utsav! Prem ane bhaichara no tyohaar, gulal ni bauchar." },
+            "3-23": { name: "Shaheed Diwas", theme: "shaheed", desc: "Bhagat Singh, Sukhdev ane Rajguru ne koti koti naman. Sacrifice, bravery, emotion." },
+            "4-14": { name: "Ambedkar Jayanti", theme: "ambedkar", desc: "Bharatiya Sanvidhan na ghadvaiya Dr. Babasaheb Ambedkar ne naman." },
+            "8-15": { name: "Independence Day", theme: "independence", desc: "Aazadi no tyohaar. Tirango hamesha uncho rahe." },
+            "11-8": { name: "Diwali", theme: "diwali", desc: "Deepotsavi! Prakash no utsav, ghar-ghar ma divada ane sukh-samriddhi." }
         };
 
-        const seasons = [
-            { id: 'winter', months: [11, 0, 1], color: '#f0f4f8' },
-            { id: 'summer', months: [2, 3, 4], color: '#fff9e6' },
-            { id: 'monsoon', months: [5, 6, 7, 8], color: '#e8f1f2' },
-            { id: 'festive', months: [9, 10], color: '#fdfcf8' }
-        ];
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-        class Particle {
-            constructor(type) { this.reset(type); }
-            reset(type) {
-                this.type = type;
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.vx = (Math.random() - 0.5) * 0.4;
-                this.vy = (Math.random() - 0.5) * 0.4;
-                this.opacity = Math.random() * 0.4;
-                this.color = getComputedStyle(document.documentElement).getPropertyValue('--accent-ui').trim();
-                this.angle = Math.random() * Math.PI * 2;
+        // --- STATE ---
+        let viewMonth = 0;
+        let selectedDate = new Date(2026, 0, 1);
+        let bgIntervals = [];
 
-                if (type === 'newyear' || type === 'kids') {
-                    this.color = `hsl(${Math.random() * 360}, 60%, 60%)`;
-                    this.vy = -Math.random() * 2;
-                } else if (type === 'monsoon') {
-                    this.vy = 8 + Math.random() * 4;
-                    this.vx = 0.5;
-                    this.color = '#78909c';
-                } else if (type === 'lohri') {
-                    this.vy = -1.5 - Math.random() * 3;
-                    this.vx = (Math.random() - 0.5) * 1;
-                    this.color = '#ff7043';
-                    this.x = canvas.width / 2 + (Math.random() - 0.5) * 150;
-                    this.y = canvas.height;
-                } else if (type === 'kites') {
-                    this.size = 18;
-                    this.vx = -1.8 - Math.random();
-                    this.vy = Math.sin(Math.random() * 10) * 0.5;
-                    this.x = canvas.width + 100;
-                    this.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
-                } else if (type === 'diwali' || type === 'martyr' || type === 'petals') {
-                    this.size = type === 'petals' ? 6 : 10;
-                    this.opacity = 0.8;
-                    this.vy = type === 'petals' ? 1.2 : -0.4;
-                    this.vx = Math.sin(this.angle) * 0.5;
-                    this.color = type === 'diwali' ? '#ffd700' : (type === 'petals' ? '#fff176' : '#ffffff');
-                } else if (type === 'holi') {
-                    this.size = 60 + Math.random() * 60;
-                    this.opacity = 0.04;
-                    this.color = `hsl(${Math.random() * 360}, 60%, 75%)`;
-                }
+        // --- CORE ENGINE ---
+        function init() {
+            const now = new Date();
+            // Default to real-time if in 2026, else default to Jan 1
+            if (now.getFullYear() === 2026) {
+                viewMonth = now.getMonth();
+                selectedDate = now;
             }
-
-            update() {
-                if (!isMotionOn) return;
-                this.x += this.vx; this.y += this.vy;
-                if (this.type === 'petals') this.angle += 0.02;
-                if (this.y > canvas.height + 100) this.y = -100;
-                if (this.y < -100) this.y = canvas.height + 100;
-                if (this.x > canvas.width + 100) this.x = -100;
-                if (this.x < -100) this.x = canvas.width + 100;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.opacity;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                if (this.type === 'kites') {
-                    ctx.translate(this.x, this.y); ctx.rotate(Math.PI/4 + Math.sin(globalTime/20)*0.1);
-                    ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
-                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.5; ctx.strokeRect(-this.size/2, -this.size/2, this.size, this.size);
-                } else if (this.type === 'diwali' || this.type === 'martyr') {
-                    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 18);
-                    g.addColorStop(0, this.color); g.addColorStop(1, 'transparent');
-                    ctx.fillStyle = g; ctx.arc(this.x, this.y, 18, 0, Math.PI*2); ctx.fill();
-                } else if (this.type === 'petals') {
-                    ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-                    ctx.ellipse(0, 0, this.size, this.size/2, 0, 0, Math.PI*2); ctx.fill();
-                } else {
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
-                }
-                ctx.restore();
-            }
+            render();
+            updateBackground(selectedDate);
         }
 
-        function drawSilhouettes(type) {
-            ctx.save();
-            const w = canvas.width; const h = canvas.height;
-            const pulse = Math.sin(globalTime / 30) * 0.01;
-            ctx.globalAlpha = 0.04 + pulse;
-
-            if (type === 'republic' || type === 'independence') {
-                ctx.fillStyle = '#a52a2a';
-                ctx.beginPath(); ctx.moveTo(w*0.3, h); ctx.lineTo(w*0.3, h*0.6);
-                ctx.lineTo(w*0.35, h*0.55); ctx.lineTo(w*0.65, h*0.55);
-                ctx.lineTo(w*0.7, h*0.6); ctx.lineTo(w*0.7, h); ctx.fill();
-                
-                // Animated Ashoka Chakra
-                ctx.globalAlpha = 0.1;
-                ctx.strokeStyle = '#000080'; ctx.lineWidth = 1;
-                ctx.translate(w/2, h*0.75); ctx.rotate(globalTime / 100);
-                ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI*2); ctx.stroke();
-                for(let i=0; i<24; i++) { ctx.rotate(Math.PI/12); ctx.moveTo(0,0); ctx.lineTo(20,0); ctx.stroke(); }
-            } else if (type === 'ganesha') {
-                ctx.fillStyle = '#e64a19';
-                ctx.beginPath(); ctx.arc(w/2, h*0.6 + Math.sin(globalTime/40)*5, 65, 0, Math.PI*2); ctx.fill();
-                ctx.fillRect(w/2-25, h*0.6, 50, 90);
-            } else if (type === 'ram') {
-                ctx.strokeStyle = '#fb8c00'; ctx.lineWidth = 3;
-                const glow = Math.abs(Math.sin(globalTime/20)) * 10;
-                ctx.shadowBlur = glow; ctx.shadowColor = '#fb8c00';
-                ctx.beginPath(); ctx.arc(w/2, h/2, 160, Math.PI*0.8, Math.PI*1.2); ctx.stroke();
-                // Arrow
-                ctx.beginPath(); ctx.moveTo(w/2 - 160, h/2); ctx.lineTo(w/2 - 20, h/2); ctx.stroke();
-            } else if (type === 'gandhi') {
-                ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5;
-                // Charkha Frame
-                ctx.strokeRect(w/2 - 100, h*0.7, 200, 5);
-                // Rotating Wheel
-                ctx.translate(w/2 + 60, h*0.65); ctx.rotate(globalTime / 60);
-                ctx.beginPath(); ctx.arc(0, 0, 40, 0, Math.PI*2); ctx.stroke();
-                for(let i=0; i<8; i++) { ctx.rotate(Math.PI/4); ctx.moveTo(0,0); ctx.lineTo(40,0); ctx.stroke(); }
-            } else if (type === 'chhath' || type === 'growth') {
-                const sunY = h*0.7 + Math.sin(globalTime/50)*10;
-                const grad = ctx.createRadialGradient(w/2, sunY, 0, w/2, sunY, 120);
-                grad.addColorStop(0, 'rgba(255, 111, 0, 0.2)'); grad.addColorStop(1, 'transparent');
-                ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(w/2, sunY, 120, 0, Math.PI*2); ctx.fill();
-            }
-            ctx.restore();
-        }
-
-        function createParticles(theme) {
-            particles = []; activeTheme = theme;
-            const count = (theme === 'holi' || theme === 'winter') ? 40 : 100;
-            for(let i=0; i<count; i++) particles.push(new Particle(theme));
-        }
-
-        function animate() {
-            globalTime++;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function render() {
+            const grid = document.getElementById('days-grid');
+            const label = document.getElementById('month-label');
+            const feed = document.getElementById('fest-feed');
             
-            // Summer Heat Shimmer Effect
-            if (activeTheme === 'summer' && isMotionOn) {
-                ctx.save();
-                ctx.globalAlpha = 0.05;
-                for(let i=0; i<5; i++) {
-                    ctx.fillStyle = `rgba(255, 235, 59, ${0.1 * Math.sin(globalTime/20 + i)})`;
-                    ctx.fillRect(0, canvas.height * (0.2 * i) + Math.sin(globalTime/10)*20, canvas.width, 40);
-                }
-                ctx.restore();
-            }
-
-            if (activeTheme !== 'winter' && activeTheme !== 'summer') drawSilhouettes(activeTheme);
-            particles.forEach(p => { p.update(); p.draw(); });
-            animationFrame = requestAnimationFrame(animate);
-        }
-
-        function applyTheme(dateObj, isPreview = false) {
-            const m = dateObj.getMonth(); const d = dateObj.getDate();
-            const fest = specialDays[`${m}-${d}`];
-            isPreviewMode = isPreview;
-
-            if (isPreview && fest) {
-                document.body.classList.add('preview-active');
-                overlay.classList.add('active');
-                document.getElementById('btn-reset').style.display = 'block';
-                document.getElementById('fest-name').innerText = fest.name;
-                document.getElementById('fest-sub').innerText = fest.sub;
-                document.body.style.backgroundColor = fest.color;
-                document.documentElement.style.setProperty('--accent-ui', fest.accent);
-                document.documentElement.style.setProperty('--text-main', fest.dark ? '#ffffff' : '#333333');
-                createParticles(fest.anim);
-            } else {
-                const s = seasons.find(s => s.months.includes(m));
-                document.body.classList.remove('preview-active');
-                overlay.classList.remove('active');
-                document.getElementById('btn-reset').style.display = 'none';
-                document.body.style.backgroundColor = s.color;
-                document.documentElement.style.setProperty('--accent-ui', '#e07a5f');
-                document.documentElement.style.setProperty('--text-main', '#333333');
-                createParticles(isSeasonalOn ? s.id : 'minimal');
-            }
-        }
-
-        function exitFestMode() { applyTheme(new Date(currentYear, currentMonth, 1), false); }
-
-        function renderCalendar() {
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            monthTitle.innerText = months[currentMonth]; clockEl.innerText = `LIVE • 1 ${months[currentMonth].toUpperCase()} 2026`;
             grid.innerHTML = '';
-            ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(l => {
-                const d = document.createElement('div'); d.className = 'text-[10px] text-gray-400 tracking-widest pb-4'; d.innerText = l; grid.appendChild(d);
+            label.innerText = months[viewMonth];
+
+            const startDay = new Date(2026, viewMonth, 1).getDay();
+            const daysInMonth = new Date(2026, viewMonth + 1, 0).getDate();
+
+            for (let i = 0; i < startDay; i++) {
+                grid.innerHTML += `<div></div>`;
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const key = `${viewMonth + 1}-${d}`;
+                const isFest = festivals[key];
+                const isActive = selectedDate.getDate() === d && selectedDate.getMonth() === viewMonth;
+
+                const node = document.createElement('div');
+                node.className = `day-node ${isFest ? 'is-fest' : ''} ${isActive ? 'active' : ''}`;
+                node.innerText = d;
+                node.onclick = () => selectDate(d, viewMonth);
+                grid.appendChild(node);
+            }
+
+            // Festival List
+            feed.innerHTML = '';
+            Object.keys(festivals).forEach(key => {
+                const [m, d] = key.split('-').map(Number);
+                if (m === viewMonth + 1) {
+                    const item = document.createElement('div');
+                    item.className = "p-3.5 bg-white/5 rounded-xl border border-white/5 cursor-pointer hover:bg-white/10 transition";
+                    item.innerHTML = `<div class="text-[10px] opacity-40 mb-1">${d} ${months[m-1]}</div><div class="font-bold text-sm text-white/90">${festivals[key].name}</div>`;
+                    item.onclick = () => selectDate(d, viewMonth);
+                    feed.appendChild(item);
+                }
             });
-            const first = new Date(currentYear, currentMonth, 1).getDay();
-            const total = new Date(currentYear, currentMonth + 1, 0).getDate();
-            for(let i=0; i<first; i++) grid.appendChild(document.createElement('div'));
-            for(let d=1; d<=total; d++) {
-                const cell = document.createElement('div'); const special = specialDays[`${currentMonth}-${d}`];
-                cell.className = 'date-cell'; cell.innerText = d; if (special) cell.classList.add('is-special');
-                cell.onclick = () => special ? applyTheme(new Date(2026, currentMonth, d), true) : exitFestMode();
-                grid.appendChild(cell);
+        }
+
+        function selectDate(d, m) {
+            selectedDate = new Date(2026, m, d);
+            render();
+            updateBackground(selectedDate);
+        }
+
+        function moveMonth(dir) {
+            viewMonth = (viewMonth + dir + 12) % 12;
+            render();
+        }
+
+        function gotoActualToday() {
+            const today = new Date();
+            viewMonth = today.getMonth();
+            selectedDate = new Date(2026, viewMonth, today.getDate());
+            render();
+            updateBackground(selectedDate);
+        }
+
+        // --- ANIMATION CONTROLLER ---
+        function updateBackground(date) {
+            const m = date.getMonth() + 1;
+            const d = date.getDate();
+            const key = `${m}-${d}`;
+            const fest = festivals[key];
+            const layer = document.getElementById('animation-layer');
+            const hDate = document.getElementById('hero-date');
+            const hFest = document.getElementById('hero-fest');
+            const hDesc = document.getElementById('hero-desc');
+
+            // Cleanup
+            layer.innerHTML = '';
+            bgIntervals.forEach(clearInterval);
+            bgIntervals = [];
+
+            hDate.innerText = `${d} ${months[m-1]}`;
+            
+            if (fest) {
+                hFest.innerText = fest.name;
+                hDesc.innerText = fest.desc;
+                applyFestivalAnimation(fest.theme, layer);
+            } else {
+                hFest.innerText = "";
+                const season = getSeason(m);
+                hDesc.innerText = season.desc;
+                applySeasonAnimation(season.theme, layer);
             }
         }
 
-        function turnPage(dir) {
-            page.classList.add('page-flip-exit');
-            setTimeout(() => {
-                currentMonth += dir; if(currentMonth>11){currentMonth=0;currentYear++;} if(currentMonth<0){currentMonth=11;currentYear--;}
-                renderCalendar(); applyTheme(new Date(currentYear, currentMonth, 1), false);
-                page.classList.remove('page-flip-exit'); page.classList.add('page-flip-enter');
-                setTimeout(() => page.classList.remove('page-flip-enter'), 50);
-            }, 500);
+        function getSeason(m) {
+            if (m >= 1 && m <= 3) return { theme: 'winter', desc: "Thandi savar ane dhundhlo prakash. Soft winter mist in the air." };
+            if (m >= 4 && m <= 6) return { theme: 'summer', desc: "Garam hava ane shimmering sunlight. Summer vibes across India." };
+            if (m >= 7 && m <= 9) return { theme: 'monsoon', desc: "Varsad ni rimzim ane fresh green environment. Nature in full bloom." };
+            return { theme: 'festive', desc: "Warm golden light ane festive glow. A peaceful clear sky." };
         }
 
-        function resetToToday() { currentMonth = 0; currentYear = 2026; renderCalendar(); applyTheme(new Date(2026, 0, 1), true); }
-        function toggleSeasonal() { isSeasonalOn = !isSeasonalOn; document.getElementById('btn-season').innerText = `Seasonal: ${isSeasonalOn?'On':'Off'}`; applyTheme(new Date(currentYear, currentMonth, 1), false); }
-        function toggleMotion() { isMotionOn = !isMotionOn; document.getElementById('btn-motion').innerText = `Motion: ${isMotionOn?'On':'Off'}`; }
+        function applyFestivalAnimation(theme, layer) {
+            switch(theme) {
+                case 'newyear':
+                    layer.style.background = 'radial-gradient(circle at center, #050a15 0%, #000 100%)';
+                    const nyText = document.createElement('div');
+                    nyText.className = "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/10 text-6xl font-black uppercase tracking-[0.5em] text-center w-full";
+                    nyText.innerText = "Happy New Year 2026";
+                    layer.appendChild(nyText);
+                    const intvNY = setInterval(() => spawnFirework(layer), 800);
+                    bgIntervals.push(intvNY);
+                    break;
+                case 'uttarayan':
+                    layer.style.background = 'linear-gradient(to bottom, #2980b9, #6dd5fa)';
+                    for(let i=0; i<15; i++) spawnKite(layer);
+                    break;
+                case 'republic':
+                case 'independence':
+                    layer.style.background = '#0a0a0a';
+                    const tri = document.createElement('div');
+                    tri.className = "absolute inset-0 opacity-10 flex flex-col";
+                    tri.innerHTML = '<div class="flex-1 bg-[#FF9933]"></div><div class="flex-1 bg-white"></div><div class="flex-1 bg-[#138808]"></div>';
+                    layer.appendChild(tri);
+                    spawnCenterLogo(layer, theme === 'republic' ? 'Chakra' : 'Flag');
+                    break;
+                case 'shivratri':
+                    layer.style.background = 'radial-gradient(circle at 70% 20%, #1a1a2e 0%, #020205 100%)';
+                    spawnMoon(layer, true);
+                    spawnStars(layer, 80);
+                    break;
+                case 'shaheed':
+                    layer.style.background = '#000';
+                    const glow = document.createElement('div');
+                    glow.className = "absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[60%] bg-gradient-to-t from-orange-900/20 to-transparent blur-[120px]";
+                    layer.appendChild(glow);
+                    spawnStars(layer, 15);
+                    break;
+                case 'diwali':
+                    layer.style.background = 'radial-gradient(circle at bottom, #2c1a0a 0%, #050505 100%)';
+                    const intvD = setInterval(() => spawnSparkle(layer), 100);
+                    bgIntervals.push(intvD);
+                    break;
+                case 'holi':
+                    layer.style.background = '#0a050a';
+                    for(let i=0; i<30; i++) spawnColorSplash(layer);
+                    break;
+            }
+        }
 
-        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-        window.onload = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; resetToToday(); animate(); };
+        function applySeasonAnimation(theme, layer) {
+            switch(theme) {
+                case 'winter':
+                    layer.style.background = 'linear-gradient(to bottom, #1e3c72, #2a5298)';
+                    const mist = document.createElement('div');
+                    mist.className = "mist-layer";
+                    layer.appendChild(mist);
+                    break;
+                case 'summer':
+                    layer.style.background = 'linear-gradient(to bottom, #ff9966, #ff5e62)';
+                    const shimmer = document.createElement('div');
+                    shimmer.className = "absolute inset-0 bg-white/5 animate-pulse blur-3xl";
+                    layer.appendChild(shimmer);
+                    break;
+                case 'monsoon':
+                    layer.style.background = '#0f172a';
+                    const intvR = setInterval(() => spawnRain(layer), 50);
+                    bgIntervals.push(intvR);
+                    break;
+                default:
+                    layer.style.background = 'radial-gradient(circle at center, #111 0%, #000 100%)';
+                    spawnStars(layer, 30);
+            }
+        }
+
+        // --- ASSET SPAWNERS ---
+        function spawnFirework(parent) {
+            const burst = document.createElement('div');
+            burst.className = 'firework-particle';
+            const x = Math.random() * 100;
+            const y = Math.random() * 80;
+            const size = Math.random() * 300 + 100;
+            const color = `hsl(${Math.random()*360}, 100%, 75%)`;
+            burst.style.cssText = `left:${x}vw; top:${y}vh; width:${size}px; height:${size}px; border:1px solid ${color}; box-shadow:0 0 50px ${color};`;
+            parent.appendChild(burst);
+            setTimeout(() => burst.remove(), 2000);
+        }
+
+        function spawnKite(parent) {
+            const k = document.getElementById('svg-kite').cloneNode(true);
+            k.classList.add('kite-asset');
+            k.style.display = 'block';
+            k.style.left = Math.random() * 90 + 'vw';
+            k.style.top = Math.random() * 90 + 'vh';
+            k.style.color = `hsl(${Math.random()*360}, 70%, 65%)`;
+            k.style.width = (Math.random()*40 + 40) + 'px';
+            k.style.opacity = '0.7';
+            k.style.animationDelay = Math.random() * 5 + 's';
+            parent.appendChild(k);
+        }
+
+        function spawnMoon(parent, isHalf) {
+            const moon = document.createElement('div');
+            moon.style.cssText = `position:absolute; top:15%; right:20%; width:100px; height:100px; background:#fefcd7; border-radius:50%; box-shadow:0 0 60px rgba(254,252,215,0.4);`;
+            if(isHalf) {
+                const mask = document.createElement('div');
+                mask.style.cssText = `position:absolute; top:-10px; right:25px; width:100px; height:100px; background:#1a1a2e; border-radius:50%;`;
+                moon.appendChild(mask);
+            }
+            parent.appendChild(moon);
+        }
+
+        function spawnStars(parent, n) {
+            for(let i=0; i<n; i++) {
+                const s = document.createElement('div');
+                s.style.cssText = `position:absolute; left:${Math.random()*100}vw; top:${Math.random()*100}vh; width:2px; height:2px; background:white; border-radius:50%; opacity:${Math.random()}; filter:blur(1px);`;
+                parent.appendChild(s);
+            }
+        }
+
+        function spawnRain(parent) {
+            const r = document.createElement('div');
+            r.style.cssText = `position:absolute; left:${Math.random()*100}vw; top:-30px; width:1px; height:35px; background:rgba(255,255,255,0.2);`;
+            parent.appendChild(r);
+            r.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(110vh)' }], { duration: 600, easing: 'linear' }).onfinish = () => r.remove();
+        }
+
+        function spawnColorSplash(parent) {
+            const colors = ['#FF1493', '#00BFFF', '#32CD32', '#FFD700', '#FF4500'];
+            const splash = document.createElement('div');
+            const size = Math.random() * 200 + 100;
+            splash.style.cssText = `position:absolute; left:${Math.random()*100}vw; top:${Math.random()*100}vh; width:${size}px; height:${size}px; background:${colors[Math.floor(Math.random()*5)]}; border-radius:50%; filter:blur(60px); opacity:0.15;`;
+            parent.appendChild(splash);
+        }
+
+        function spawnSparkle(parent) {
+            const s = document.createElement('div');
+            const size = Math.random() * 4 + 2;
+            s.style.cssText = `position:absolute; left:${Math.random()*100}vw; bottom:0; width:${size}px; height:${size}px; background:gold; border-radius:50%; box-shadow:0 0 15px gold;`;
+            parent.appendChild(s);
+            s.animate([{ transform: 'translateY(0) scale(1)', opacity: 1 }, { transform: 'translateY(-100vh) scale(0)', opacity: 0 }], { duration: Math.random()*3000 + 2000, easing: 'ease-out' }).onfinish = () => s.remove();
+        }
+
+        function spawnCenterLogo(parent, type) {
+            const logo = document.createElement('div');
+            logo.className = "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 pointer-events-none";
+            logo.innerHTML = `<div class="w-64 h-64 border-4 border-white/20 rounded-full flex items-center justify-center"><div class="text-4xl font-black">${type === 'Chakra' ? '☸' : '🇮🇳'}</div></div>`;
+            parent.appendChild(logo);
+        }
+
+        window.onload = init;
