@@ -1,46 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="gu">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar 2026</title>
+    <title>Bharatnu Master Calendar 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Style.css">
 </head>
 <body>
 
-    <div class="fixed top-8 left-8 text-[10px] tracking-[0.4em] opacity-40 z-50"> CALENDAR • 2026</div>
-    <div class="realtime-badge" id="realtime-clock">LIVE • 1 JAN 2026</div>
+    <div id="animation-layer"></div>
+    <div class="vignette"></div>
 
-    <canvas id="bg-canvas"></canvas>
-
-    <div class="perspective-container">
-        <div class="fest-overlay" id="fest-overlay">
-            <h2 class="text-7xl font-thin tracking-tighter" id="fest-name">Republic Day</h2>
-            <p class="text-[10px] tracking-[0.6em] uppercase mt-6 opacity-60" id="fest-sub">National Pride • 26 January</p>
-        </div>
-
-        <div class="calendar-page" id="calendar-page">
-            <h1 class="text-5xl font-extralight tracking-tight" id="month-display">January</h1>
-            <div class="calendar-grid" id="calendar-grid"></div>
-        </div>
-
-        <div class="controls">
-            <div class="flex gap-16 mb-2">
-                <button class="btn-ui" onclick="turnPage(-1)">Previous</button>
-                <button class="btn-ui" onclick="turnPage(1)">Next</button>
+    <div class="main-wrapper">
+        <main class="hero">
+            <div id="context-badge" class="mb-4 inline-flex px-4 py-1.5 rounded-full border border-white/20 bg-black/40 text-[10px] tracking-[0.3em] uppercase font-bold text-gold" style="color:var(--gold)">
+                Aaj no Divas
             </div>
-            <div class="flex gap-8 items-center">
-                <button class="btn-ui" id="btn-season" onclick="toggleSeasonal()">Seasonal: On</button>
-                <button class="btn-ui" id="btn-motion" onclick="toggleMotion()">Motion: On</button>
-                <button class="btn-ui" id="btn-reset" onclick="resetToToday()" style="display:none; color:black; font-weight:600;">Back to Live</button>
+            <h1 id="hero-date" class="display-date">1 January</h1>
+            <h2 id="hero-fest" class="text-3xl font-serif text-saffron mb-4 italic" style="color:var(--saffron)"></h2>
+            <p id="hero-desc" class="text-lg opacity-75 max-w-xl font-light leading-relaxed">
+                Loading 2026 atmosphere...
+            </p>
+            
+            <div class="mt-10 flex gap-4 pointer-events-auto">
+                <button onclick="gotoActualToday()" class="px-10 py-3.5 bg-white text-black rounded-full font-bold hover:bg-gold transition-all duration-300 transform active:scale-95 shadow-xl">
+                    Today
+                </button>
             </div>
-        </div>
+        </main>
+
+        <aside class="sidebar">
+            <div class="flex items-center justify-between mb-10">
+                <button onclick="moveMonth(-1)" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition">←</button>
+                <div class="text-center">
+                    <h2 id="month-label" class="text-2xl font-bold font-serif">January</h2>
+                    <span class="text-[10px] tracking-widest opacity-40 uppercase">Isavi San 2026</span>
+                </div>
+                <button onclick="moveMonth(1)" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition">→</button>
+            </div>
+
+            <div class="grid grid-cols-7 text-center text-[10px] font-black opacity-30 tracking-widest mb-4">
+                <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+            </div>
+
+            <div id="days-grid" class="calendar-grid"></div>
+
+            <div class="mt-auto pt-8 border-t border-white/10">
+                <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-saffron mb-5">Upcoming Festivals</h3>
+                <div id="fest-feed" class="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                    <!-- Festivals list -->
+                </div>
+            </div>
+        </aside>
     </div>
 
+    <!-- Hidden SVG Prototypes -->
+    <div style="display:none">
+        <svg id="svg-kite" viewBox="0 0 100 100">
+            <path d="M50 0 L90 40 L50 80 L10 40 Z" fill="currentColor" />
+            <path d="M10 40 L90 40 M50 0 L50 80" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+            <path d="M50 80 Q60 100 50 125" fill="none" stroke="currentColor" stroke-width="3"/>
+        </svg>
+    </div>
 
+    
+        <script src="Script.js"></script>
+    
 </body>
 </html>
