@@ -1,120 +1,175 @@
-:root {
-            --bg-base: #fdfcf8;
-            --text-main: #333333;
-            --accent-ui: #e07a5f;
-            --page-transition: 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+        :root {
+            --gold: #D4AF37;
+            --saffron: #FF9933;
+            --white: #FFFFFF;
+            --green: #138808;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            overflow: hidden;
+        body, html {
             margin: 0;
-            user-select: none;
-            transition: background-color 1.5s ease;
+            padding: 0;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background: #050505;
+            color: white;
         }
 
-        #bg-canvas {
+        .main-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- BACKGROUND ANIMATION ENGINE --- */
+        #animation-layer {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: 1;
+            transition: background 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 50%, transparent 0%, rgba(0,0,0,0.8) 100%);
+            z-index: 2;
             pointer-events: none;
         }
 
-        .perspective-container {
-            perspective: 2000px;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            position: relative;
-        }
-
-        .calendar-page {
-            position: relative;
-            width: 100%;
-            max-width: 480px;
+        /* --- SIDEBAR UI --- */
+        .sidebar {
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(30px);
+            border-left: 1px solid rgba(255,255,255,0.08);
             padding: 2.5rem;
-            background: transparent;
-            transform-style: preserve-3d;
-            transition: transform var(--page-transition), opacity var(--page-transition), filter 0.8s ease;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            z-index: 30;
+            box-shadow: -15px 0 40px rgba(0,0,0,0.7);
         }
-
-        .page-flip-exit { transform: rotateY(-110deg) translateX(-110%) scale(0.8); opacity: 0; }
-        .page-flip-enter { transform: rotateY(30deg) translateX(60%) scale(0.9); opacity: 0; }
-
-        .fest-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -55%);
-            text-align: center;
-            pointer-events: none;
-            opacity: 0;
-            transition: 1.2s ease-out;
-            width: 100%;
-            z-index: 5;
-        }
-
-        .fest-overlay.active { opacity: 1; transform: translate(-50%, -50%); }
 
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 0.4rem;
-            margin-top: 2rem;
+            gap: 8px;
+            margin-top: 1.5rem;
         }
 
-        .date-cell {
+        .day-node {
             aspect-ratio: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.95rem;
-            font-weight: 300;
-            border-radius: 50%;
             cursor: pointer;
-            transition: 0.3s;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
-        }
-        .date-cell:hover { background: rgba(0,0,0,0.05); transform: scale(1.1); }
-        .date-cell.is-special { color: var(--accent-ui); font-weight: 600; }
-        .date-cell.is-special::after {
-            content: ''; position: absolute; bottom: 5px; width: 4px; height: 4px;
-            background: var(--accent-ui); border-radius: 50%; box-shadow: 0 0 10px var(--accent-ui);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid transparent;
         }
 
-        .controls {
+        .day-node:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .day-node.active {
+            background: var(--gold);
+            color: black;
+            font-weight: 800;
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .day-node.is-fest {
+            color: var(--saffron);
+            font-weight: 600;
+        }
+
+        .day-node.is-fest::after {
+            content: '';
             position: absolute;
-            bottom: 2.5rem;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 5px;
+            width: 4px;
+            height: 4px;
+            background: var(--saffron);
+            border-radius: 50%;
+        }
+
+        /* --- HERO TEXT DISPLAY --- */
+        .hero {
+            padding: 5rem;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 1.2rem;
-            z-index: 100;
+            justify-content: flex-end;
+            z-index: 20;
+            pointer-events: none;
         }
 
-        .btn-ui {
-            background: none; border: none; cursor: pointer; color: #888;
-            font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
-            transition: 0.3s;
+        .display-date {
+            font-family: 'Playfair Display', serif;
+            font-size: 6rem;
+            line-height: 0.9;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.9);
         }
-        .btn-ui:hover { color: var(--text-main); }
 
-        .preview-active .calendar-page { opacity: 0.05; filter: blur(15px); pointer-events: none; }
-        
-        .realtime-badge {
-            position: fixed; top: 2rem; right: 2rem;
-            font-size: 0.6rem; letter-spacing: 0.2em;
-            color: #aaa; background: rgba(0,0,0,0.03);
-            padding: 0.5rem 1rem; border-radius: 20px;
+        /* --- 2D ASSET ANIMATIONS --- */
+        @keyframes kiteFloat {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
+        }
+        .kite-asset {
+            position: absolute;
+            animation: kiteFloat 6s ease-in-out infinite;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
+        }
+
+        @keyframes firework {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+        .firework-particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: firework 2s ease-out forwards;
+        }
+
+        @keyframes mistDrift {
+            from { transform: translateX(-10%); }
+            to { transform: translateX(10%); }
+        }
+        .mist-layer {
+            position: absolute;
+            bottom: 0;
+            width: 120%;
+            height: 40%;
+            background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
+            filter: blur(60px);
+            animation: mistDrift 20s linear infinite alternate;
+        }
+
+        @keyframes flagWave {
+            0%, 100% { transform: skewX(0deg); }
+            50% { transform: skewX(2deg); }
+        }
+        .flag-wave { animation: flagWave 3s ease-in-out infinite; }
+
+        @media (max-width: 1024px) {
+            .main-wrapper { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .hero { padding: 2.5rem; }
+            .display-date { font-size: 3.5rem; }
         }
