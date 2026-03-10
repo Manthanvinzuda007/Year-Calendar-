@@ -1,72 +1,111 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bharatnu Master Calendar 2026</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="Style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bharatnu Master Calendar 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="Style.css">
 </head>
 <body>
 
-    <div id="animation-layer"></div>
-    <div class="vignette"></div>
+<div id="animation-layer"></div>
+<div class="vignette"></div>
 
-    <div class="main-wrapper">
-        <main class="hero">
-            <div id="context-badge" class="mb-4 inline-flex px-4 py-1.5 rounded-full border border-white/20 bg-black/40 text-[10px] tracking-[0.3em] uppercase font-bold text-gold" style="color:var(--gold)">
-                Aaj no Divas
-            </div>
-            <h1 id="hero-date" class="display-date">1 January</h1>
-            <h2 id="hero-fest" class="text-3xl font-serif text-saffron mb-4 italic" style="color:var(--saffron)"></h2>
-            <p id="hero-desc" class="text-lg opacity-75 max-w-xl font-light leading-relaxed">
-                Loading 2026 atmosphere...
-            </p>
-            
-            <div class="mt-10 flex gap-4 pointer-events-auto">
-                <button onclick="gotoActualToday()" class="px-10 py-3.5 bg-white text-black rounded-full font-bold hover:bg-gold transition-all duration-300 transform active:scale-95 shadow-xl">
-                    Today
-                </button>
-            </div>
-        </main>
-
-        <aside class="sidebar">
-            <div class="flex items-center justify-between mb-10">
-                <button onclick="moveMonth(-1)" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition">←</button>
-                <div class="text-center">
-                    <h2 id="month-label" class="text-2xl font-bold font-serif">January</h2>
-                    <span class="text-[10px] tracking-widest opacity-40 uppercase">Isavi San 2026</span>
-                </div>
-                <button onclick="moveMonth(1)" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition">→</button>
-            </div>
-
-            <div class="grid grid-cols-7 text-center text-[10px] font-black opacity-30 tracking-widest mb-4">
-                <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
-            </div>
-
-            <div id="days-grid" class="calendar-grid"></div>
-
-            <div class="mt-auto pt-8 border-t border-white/10">
-                <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-saffron mb-5">Upcoming Festivals</h3>
-                <div id="fest-feed" class="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-                    <!-- Festivals list -->
-                </div>
-            </div>
-        </aside>
+<div class="main-wrapper">
+  <main class="hero">
+    <div class="hero-badge">✦ BHARATNU MASTER CALENDAR 2026 ✦</div>
+    <h1 id="hero-date" class="display-date">1 January</h1>
+    <h2 id="hero-fest" class="hero-fest-name"></h2>
+    <p  id="hero-desc" class="hero-desc">Loading 2026 atmosphere…</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="today-btn" onclick="gotoActualToday()">◈ AAJNO DIVAS</button>
+      <button class="today-btn yearview-btn" onclick="toggleYearView()">⊞ FULL YEAR VIEW</button>
     </div>
+  </main>
 
-    <!-- Hidden SVG Prototypes -->
-    <div style="display:none">
-        <svg id="svg-kite" viewBox="0 0 100 100">
-            <path d="M50 0 L90 40 L50 80 L10 40 Z" fill="currentColor" />
-            <path d="M10 40 L90 40 M50 0 L50 80" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-            <path d="M50 80 Q60 100 50 125" fill="none" stroke="currentColor" stroke-width="3"/>
-        </svg>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <button class="month-nav-btn" onclick="moveMonth(-1)">‹</button>
+      <div class="sidebar-month-title">
+        <h2 id="month-label" onclick="toggleMonthPicker()" style="cursor:pointer;" title="Click to pick month">January ▾</h2>
+        <span>ISAVI SAN 2026</span>
+      </div>
+      <button class="month-nav-btn" onclick="moveMonth(1)">›</button>
     </div>
+    <!-- Month picker dropdown -->
+    <div id="month-picker" style="display:none; position:absolute; top:80px; left:50%; transform:translateX(-50%);
+      z-index:100; background:rgba(10,8,24,0.97); border:1px solid rgba(255,255,255,0.12);
+      border-radius:14px; padding:10px; display:none; grid-template-columns:repeat(3,1fr);
+      gap:6px; width:280px; box-shadow:0 20px 60px rgba(0,0,0,0.8);">
+      <div class="mp-item" onclick="jumpMonth(0)">Jan</div>
+      <div class="mp-item" onclick="jumpMonth(1)">Feb</div>
+      <div class="mp-item" onclick="jumpMonth(2)">Mar</div>
+      <div class="mp-item" onclick="jumpMonth(3)">Apr</div>
+      <div class="mp-item" onclick="jumpMonth(4)">May</div>
+      <div class="mp-item" onclick="jumpMonth(5)">Jun</div>
+      <div class="mp-item" onclick="jumpMonth(6)">Jul</div>
+      <div class="mp-item" onclick="jumpMonth(7)">Aug</div>
+      <div class="mp-item" onclick="jumpMonth(8)">Sep</div>
+      <div class="mp-item" onclick="jumpMonth(9)">Oct</div>
+      <div class="mp-item" onclick="jumpMonth(10)">Nov</div>
+      <div class="mp-item" onclick="jumpMonth(11)">Dec</div>
+    </div>
+    <div class="day-headers">
+      <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+    </div>
+    <div id="days-grid" class="calendar-grid"></div>
+    <div class="fest-feed-wrap">
+      <div class="fest-feed-label">Upcoming Festivals</div>
+      <div id="fest-feed" class="fest-feed"></div>
+    </div>
+  </aside>
+</div>
 
-    
-        <script src="Script.js"></script>
-    
+<!-- FULL YEAR VIEW OVERLAY -->
+<div id="year-view-overlay" class="yv-overlay">
+  <div class="yv-panel">
+    <div class="yv-topbar">
+      <div class="yv-title">✦ 2026 — FULL YEAR ✦</div>
+      <button class="yv-close" onclick="toggleYearView()">✕ BAND KARO</button>
+    </div>
+    <div id="yv-grid" class="yv-months-grid"></div>
+    <div class="yv-legend">
+      <span class="yv-leg-dot" style="background:var(--saffron);"></span> Festival <!-- Hidden SVG prototypes -->nbsp;<!-- Hidden SVG prototypes -->nbsp;
+      <span class="yv-leg-dot" style="background:var(--gold);"></span> Aaj no Divas
+    </div>
+  </div>
+</div>
+
+<!-- Hidden SVG prototypes -->
+<div style="display:none;">
+  <svg id="svg-kite" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="50,5 95,50 50,95 5,50" fill="currentColor" opacity="0.9"/>
+    <line x1="5" y1="50" x2="95" y2="50" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+    <line x1="50" y1="5" x2="50" y2="95" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+    <polygon points="50,5 95,50 72,27" fill="rgba(255,255,255,0.2)"/>
+    <polygon points="50,95 5,50 27,72" fill="rgba(0,0,0,0.2)"/>
+    <path d="M50,95 Q65,110 55,130 Q45,150 60,165" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+    <circle cx="65" cy="120" r="3" fill="currentColor" opacity="0.7"/>
+  </svg>
+  <svg id="svg-trishul" viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+    <line x1="40" y1="20" x2="40" y2="160" stroke="silver" stroke-width="4" stroke-linecap="round"/>
+    <path d="M40,20 L28,50 L34,45 L34,80 L40,75 L46,80 L46,45 L52,50 Z" fill="silver"/>
+    <path d="M20,30 Q15,20 20,15 Q28,22 28,35" fill="silver" opacity="0.8"/>
+    <path d="M60,30 Q65,20 60,15 Q52,22 52,35" fill="silver" opacity="0.8"/>
+    <ellipse cx="40" cy="158" rx="8" ry="4" fill="rgba(150,120,255,0.5)"/>
+  </svg>
+  <svg id="svg-diya" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="40" cy="55" rx="25" ry="12" fill="#8B5E3C"/>
+    <ellipse cx="40" cy="52" rx="22" ry="10" fill="#C4813A"/>
+    <ellipse cx="40" cy="50" rx="18" ry="8"  fill="#D4943E"/>
+    <ellipse cx="40" cy="48" rx="12" ry="5"  fill="rgba(255,220,100,0.3)"/>
+    <path d="M40,48 Q38,30 40,15 Q42,30 40,48" fill="#FFD700" opacity="0.9"/>
+    <path d="M40,48 Q35,35 37,18 Q41,33 40,48" fill="#FF8C00" opacity="0.7"/>
+    <path d="M40,48 Q45,35 43,18 Q39,33 40,48" fill="#FF6600" opacity="0.5"/>
+    <ellipse cx="40" cy="49" rx="5" ry="3" fill="rgba(255,255,200,0.8)"/>
+  </svg>
+</div>
+    <script src="Script.js"></script>
 </body>
 </html>
